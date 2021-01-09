@@ -1,7 +1,6 @@
 class SudokuSolver {
 
-  validate(puzzleString) {
-  }
+  validate(puzzleString) {}
 
   checkRowPlacement(puzzleString, row, column, value) {
 
@@ -16,9 +15,8 @@ class SudokuSolver {
   }
 
   solve(puzzleString) {
-    
+
   }
 }
 
 module.exports = SudokuSolver;
-
