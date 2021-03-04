@@ -51,7 +51,10 @@ suite('UnitTests', () => {
       // 横に9こずつ埋めて行きます。（A行B行...）
       // we have the example puzzle string in the input now
       // input's B row is ..63.12.7　（B行に9文字分 -> 946381257 -> B行のB1, B2ときたら4）
-      let result = solver.checkRowPlacement(puzzle, 'B', 2, 4);
+
+      let map = solver.validateCommonAndReturnMap(puzzle, 'B', 2, 4);
+
+      let result = solver.checkRowPlacement(map, 'B', 2, 4);
       assert.equal(result, true);
       done();
     });
@@ -62,7 +65,10 @@ suite('UnitTests', () => {
       input = input[0];
       // we have the example puzzle string in the input now
       // input's B row is ..63.12.7
-      let result = solver.checkRowPlacement(input, 'B', 2, 7);
+
+      let map = solver.validateCommonAndReturnMap(input, 'B', 2, 7);
+
+      let result = solver.checkRowPlacement(map, 'B', 2, 7);
       assert.equal(result, false);
       done();
     });
@@ -75,7 +81,10 @@ suite('UnitTests', () => {
       input = input[0];
       //we have the example puzzle string in the input now
       //input's B row is ..63.12.7
-      let result = solver.checkColPlacement(input, 'B', 5, 7);
+
+      let map = solver.validateCommonAndReturnMap(input, 'B', 5, 7);
+
+      let result = solver.checkColPlacement(map, 'B', 5, 7);
       assert.equal(result, true);
       done();
     });
@@ -86,7 +95,10 @@ suite('UnitTests', () => {
       input = input[0];
       //we have the example puzzle string in the input now
       //input's B row is ..63.12.7
-      let result = solver.checkColPlacement(input, 'B', 5, 4);
+
+      let map = solver.validateCommonAndReturnMap(input, 'B', 5, 4);
+
+      let result = solver.checkColPlacement(map, 'B', 5, 4);
       assert.equal(result, false);
       done();
     });
@@ -102,7 +114,9 @@ suite('UnitTests', () => {
       //'.', '8', '4',
       //'2', '.', '7',
       //'.', '.', '.'
-      let result = solver.checkRegionPlacement(input, 'B', 8, 5);
+
+      let map = solver.validateCommonAndReturnMap(input, 'B', 8, 5);
+      let result = solver.checkRegionPlacement(map, 'B', 8, 5);
       assert.equal(result, true);
       done();
     })
@@ -116,7 +130,8 @@ suite('UnitTests', () => {
       //'.', '8', '4',
       //'2', '.', '7',
       //'.', '.', '.'
-      let result = solver.checkColPlacement(input, 'B', 8, 8);
+      let map = solver.validateCommonAndReturnMap(input, 'B', 8, 8);
+      let result = solver.checkRegionPlacement(map, 'B', 8, 8);
       assert.equal(result, false);
       done();
     })

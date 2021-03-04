@@ -26,7 +26,7 @@ module.exports = function (app) {
       let row = coordinate[0];
       let column = Number(coordinate[1]);
       value = Number(value);
-      console.log(value);
+
       if (solver.argumentValidator(row, column, value, Rows) !== true) {
         return res.send({
           error: solver.argumentValidator(row, column, value, Rows)
@@ -39,32 +39,34 @@ module.exports = function (app) {
         });
       }
 
+      let map = solver.validateCommonAndReturnMap(puzzle, row, column, value);
+
       if (
-        solver.checkRowPlacement(puzzle, row, column, value) &&
-        solver.checkColPlacement(puzzle, row, column, value) &&
-        solver.checkRegionPlacement(puzzle, row, column, value)
+        solver.checkRowPlacement(map, row, column, value) &&
+        solver.checkColPlacement(map, row, column, value) &&
+        solver.checkRegionPlacement(map, row, column, value)
       ) {
         return res.send({
           valid: true
         });
       }
 
-      if (!solver.checkRowPlacement(puzzle, row, column, value)) {
+      if (!solver.checkRowPlacement(map, row, column, value)) {
         conflictArray.push('row');
       }
 
-      if (!solver.checkColPlacement(puzzle, row, column, value)) {
+      if (!solver.checkColPlacement(map, row, column, value)) {
         conflictArray.push('column');
       }
 
-      if (!solver.checkRegionPlacement(puzzle, row, column, value)) {
+      if (!solver.checkRegionPlacement(map, row, column, value)) {
         conflictArray.push('region');
       }
+
       return res.send({
         valid: false,
         conflict: conflictArray
       })
-
     });
 
   app.route('/api/solve')
@@ -77,6 +79,7 @@ module.exports = function (app) {
       let puzzleString = req.body.puzzle;
       if (solver.validate(puzzleString) === true) {
         if (solver.solve(puzzleString)) {
+
           let solution = solver.solve(puzzleString);
           return res.send({
             solution: solution
