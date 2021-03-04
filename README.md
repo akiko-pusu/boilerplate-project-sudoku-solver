@@ -91,3 +91,11 @@ Running Tests...
 
   0 passing (0ms)
 ```
+
+### freeCodeCamp側のテスト
+　
+<https://www.freecodecamp.org/learn/quality-assurance/quality-assurance-projects/sudoku-solver>を通してテストをする場合は、NODE_ENV=testの状態で起動すること。
+``/_api/get-tests`` のエンドポイントに対してリクエストを発行し、帰ってきた結果を配列として読み込んでチェックするテストがあるからです。
+
+- freeCodeCamp側のテストブラウザテストは以下のソースコードが該当
+  - <https://github.com/freeCodeCamp/freeCodeCamp/blob/29e91dc3a314d68583b2cf782c635127ea41ca8c/curriculum/challenges/chinese/06-quality-assurance/quality-assurance-projects/sudoku-solver.md>
