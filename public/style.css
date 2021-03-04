@@ -1,3 +1,7 @@
+body {
+  color: #381e1e;
+}
+
 code {
   background: #d0d0d5;
 }
@@ -32,17 +36,17 @@ textarea {
 }
 
 .grid {
-  border: 3px solid;
+  border: 3px solid #b04d4d;
   border-spacing: 0;
 }
 
 td {
-  border: 1px solid;
+  border: 1px solid #b04d4d;
   padding: 0.3em;
 }
 
 .sudoku-input {
-  border: 1px solid black;
+  border: 1px solid #b04d4d;
   width: 2em;
   height: 2em;
   text-align: center;
@@ -66,7 +70,7 @@ td {
 .F7,
 .F8,
 .F9 {
-  border-bottom: 3px solid;
+  border-bottom: 3px solid #b04d4d;
 }
 
 .A3,
@@ -87,7 +91,7 @@ td {
 .G6,
 .H6,
 .I6 {
-  border-right: 3px solid;
+  border-right: 3px solid #b04d4d;
 }
 
 @media (min-width: 800px) {
