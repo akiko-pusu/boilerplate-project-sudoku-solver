@@ -1,64 +1,66 @@
 const util = require('util');
 let solution;
 class SudokuSolver {
-  //helper function that places a dot at given coordinates
+  constructor(height, width) {
+    this.Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+  }
+
+  // 問題の文字列に対し、指定された座標（row: A col: 1など)にドットを挿入する
   dotPlacer(puzzleString, row, col) {
     let str;
     let {
-      Rows,
       puzzleStringMappedToRows
     } = this.puzzleStringProcessor(puzzleString);
 
-    str = puzzleStringMappedToRows[Rows[row]];
+    str = puzzleStringMappedToRows[this.Rows[row]];
 
+    // ここで置き換え
     str = str.substring(0, col - 1) + '.' + str.substring(col - 1 + 1);
 
-    puzzleStringMappedToRows[Rows[row]] = str;
+    puzzleStringMappedToRows[this.Rows[row]] = str;
 
-
-
-    //puzzleString with dot added is returned!
     return this.puzzleStringReverseProcessor(puzzleStringMappedToRows);
   }
 
-  //helper function that checkes if there is a '.' in the given coordinates!
+  // 問題の文字列に対し、指定された座標（row: A col: 1など)に当たる文字が . かどうかをチェック
   checkIfDot(puzzleString, row, col) {
     let {
-      Rows,
       puzzleStringMappedToRows
     } = this.puzzleStringProcessor(puzzleString);
-    if (puzzleStringMappedToRows[Rows[row]][col - 1] == '.') {
+    if (puzzleStringMappedToRows[this.Rows[row]][col - 1] == '.') {
       return true;
     }
     return false;
   }
 
-  //helper function that checks if the provided arguments are valid
-  argumentValidator(row, col, value, Rows) {
-    if (0 >= Number(value) || Number(value) > 9) {
-      return 'Invalid value'
+  // 引数で渡ってくる値が適切な型や範囲かどうかをチェック
+  // row: A, B. C..を期待
+  // col: 1 - 9 のいずれかを期待
+  // value: 1- 9 のいずれかを期待
+  argumentValidator(row, col, value) {
+    // パターンマッチでチェック（1から9までの数字1文字だけ）
+    const pattern = /^[1-9]$/;
+    if (!pattern.exec(value)) {
+      return 'Invalid value';
     }
-    if (isNaN(value)) {
-      return 'Invalid value'
+
+    // rowはAからFまでにマッチすること
+    if (!(this.Rows.includes(row))) {
+      return 'Invalid coordinate';
     }
-    if (!(Rows.includes(row))) {
-      return 'Invalid coordinate'
-    }
-    if ((col.toString()).length !== 1 || 0 === col || col > 9) {
-      return 'Invalid coordinate'
+
+    // colもパターンマッチでチェック
+    if (!pattern.exec(col)) {
+      return 'Invalid coordinate';
     }
     return true;
   }
 
-  // helper function that returns an Rows array,
-  // and an object that is Letters mapped to puzzlestring
+  // 入力された文字を、A-I行ごとに9文字ずつ分けた結果を返します
   puzzleStringProcessor(puzzleString) {
     let structeredPuzzleString = [];
 
     // 文字列（81文字）を引数に取り、9文字ずつ配列に格納します
-    const Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-    // following for loop seperates puzzleString every 9 characters, and pushes them
-    // to the structuredPuzzleString
     for (let i = 0; i < puzzleString.length; i = i + 9) {
       for (let j = 0; j < 9; j++) {
         structeredPuzzleString.push(puzzleString.slice(i, i + 9))
@@ -66,38 +68,44 @@ class SudokuSolver {
       }
     }
 
-    // For each element in Rows array,
-    // we add the each element of Rows as a new key to the object
-    // and add first element of structuredPuzzleString as its value.
+    // 9個ずつに区切った配列を、Key/Valueの形でマップに格納します
+    // Exp. Map['A'] = '123456789' / Map['B'] = '3691...87'
+    // const Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
     let puzzleStringMappedToRows = {};
-    Rows.forEach((key, i) => puzzleStringMappedToRows[key] = structeredPuzzleString[i]);
+    this.Rows.forEach((key, i) => puzzleStringMappedToRows[key] = structeredPuzzleString[i]);
+
+    // オブジェクトとして結果を返します
+    /*
+      { { 'A': '123456789', 'B': '3691...87', ..... }　}
+    */
     return {
       puzzleStringMappedToRows,
-      Rows
     };
   }
 
-  //helper function that reverses puzzleStringProcessor function, and returns a string
+  // マップと配列に格納したデータを、文字列に戻します
+  // { 'A': '123456789', 'B': '3691...87', ..... }
+  // 1234567893691...87..... に戻します
+  // helper function that reverses puzzleStringProcessor function, and returns a string
   puzzleStringReverseProcessor(puzzleStringMappedToRows) {
     let puzzleString = [];
-    const Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
     let i;
     let j;
     for (i = 0; i < 9; i) {
       for (j = 0; j < 9; j) {
-        puzzleString.push(puzzleStringMappedToRows[Rows[i]][j]);
+        puzzleString.push(puzzleStringMappedToRows[this.Rows[i]][j]);
         j++
       }
       i++
     }
-    //a string is returned!
     return puzzleString.join("");
   }
 
-  //helper function that determines the region of the target coordinate
+  // helper function that determines the region of the target coordinate
+  // 指定された座標が所属するリージョン（区画）を特定する (合計81個の数字で、3x3のマスの枠を1リージョンとする)
   regionator(row, column) {
 
-    //we have 9 regions
+    // we have 9 regions（数独の区画は9個分）
 
     //Rows A-C to Columns 1-3 equals region 1 which means Rows[0,1,2] and Column [1,2,3]
     //Rows A-C to Columns 4-6 equals region 2 which means Rows[0,1,2] and Column [4,5,6]
@@ -112,107 +120,57 @@ class SudokuSolver {
     //Rows G-I to columns 7-9 equals region 9 which means Rows[6,7,8] and Column [7,8,9]
 
     let region;
-    row = row.charCodeAt(0);
-    //we use char codes to compare letters.
-    if (row < 68) {
-      if (column < 4) {
+
+    // まず列でリージョンを設定（縦の列に3つずつ区分）
+    switch (true) {
+      case column > 6:
+        region = 3;
+        break;
+      case column > 3:
+        region = 2;
+        break;
+      default:
         region = 1;
-      } else if (column < 7) {
-        region = 2
-      } else {
-        region = 3
-      }
-    } else if (row < 71) {
-      if (column < 4) {
-        region = 4;
-      } else if (column < 7) {
-        region = 5;
-      } else {
-        region = 6;
-      }
-    } else {
-      if (column < 4) {
-        region = 7;
-      } else if (column < 7) {
-        region = 8;
-      } else {
-        region = 9;
-      }
     }
+
+    // 行でさらにリージョンを設定（ABC..に3行つずつ区分）
+    switch (true) {
+      case ['A', 'B', 'C'].includes(row):
+        region = region;
+        break;
+      case ['D', 'E', 'F'].includes(row):
+        region += 3;
+        break;
+      // あとはG, H, I
+      default:
+        region += 6;
+    }
+
+    // 3x3のマス1まとまりとして、何区画目にあたるかを返す
     return region;
   }
 
-  //helper function that creates appropriate region string(Array)
+  // helper function that creates appropriate region string(Array)
   regionStringMaker(puzzleStringMappedToRows, region) {
-    const Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-    let regionStringArray = [];
-    //region 1 means Rows[0,1,2] and Column [1,2,3]
-    if (region === 1) {
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j]);
-        }
-      }
-    }
-    if (region === 2) {
-      for (let i = 0; i < 3; i++) {
-        for (let j = 3; j < 6; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j]);
-        }
-      }
-    }
-    if (region === 3) {
-      for (let i = 0; i < 3; i++) {
-        for (let j = 6; j < 9; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j]);
-        }
-      }
-    }
-    if (region === 4) {
-      for (let i = 3; i < 6; i++) {
-        for (let j = 0; j < 3; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j])
-        }
-      }
-    }
-    if (region === 5) {
-      for (let i = 3; i < 6; i++) {
-        for (let j = 3; j < 6; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j])
-        }
-      }
-    }
-    if (region === 6) {
-      for (let i = 3; i < 6; i++) {
-        for (let j = 6; j < 9; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j])
-        }
-      }
-    }
-    if (region === 7) {
-      for (let i = 6; i < 9; i++) {
-        for (let j = 0; j < 3; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j])
-        }
-      }
-    }
-    if (region === 8) {
-      for (let i = 6; i < 9; i++) {
-        for (let j = 3; j < 6; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j])
-        }
-      }
-    }
-    if (region === 9) {
-      for (let i = 6; i < 9; i++) {
-        for (let j = 6; j < 9; j++) {
-          regionStringArray.push(puzzleStringMappedToRows[Rows[i]][j])
-        }
-      }
+    let allNum = Object.values(puzzleStringMappedToRows).join('');
+
+    let quotient = Math.floor(region / 3);
+    let remainder = region % 3;
+
+    let first = (region - 1) * 3;
+    if (remainder > 0 && quotient > 0) {
+      first = quotient * 27 + (remainder - 1) * 3;
     }
 
-    return regionStringArray;
+    if (remainder == 0 && quotient > 1) {
+      first = (quotient - 1) * 27 + 6;
+    }
 
+    let second = first + 9;
+    let third = first + 18;
+
+    let retVal = allNum.slice(first, first + 3) + allNum.slice(second, second + 3) + allNum.slice(third, third + 3);
+    return retVal.split('');
   }
 
   // 入力値のバリデーションを行います
@@ -239,11 +197,11 @@ class SudokuSolver {
     this.validate(puzzleString);
 
     const {
-      Rows,
       puzzleStringMappedToRows
     } = this.puzzleStringProcessor(puzzleString);
 
-    this.argumentValidator(row, column, value, Rows);
+    // 引数のチェックを行う
+    this.argumentValidator(row, column, value);
 
     //logic for valid rowPlacement is below
     //we are searching for column-1 in the string because strings are 0 indexed
@@ -270,11 +228,10 @@ class SudokuSolver {
   checkColPlacement(puzzleString, row, column, value) {
     this.validate(puzzleString);
     const {
-      Rows,
       puzzleStringMappedToRows
     } = this.puzzleStringProcessor(puzzleString);
 
-    this.argumentValidator(row, column, value, Rows);
+    this.argumentValidator(row, column, value);
 
     //logic for valid colPlacement is below
     //we are searching for column-1 in the string because strings are 0 indexed
@@ -291,7 +248,7 @@ class SudokuSolver {
     //if there is a match we return false
 
     for (let k = 0; k < puzzleStringMappedToRows[row].length; k++) {
-      if (Number(puzzleStringMappedToRows[Rows[k]][column - 1]) === value) {
+      if (Number(puzzleStringMappedToRows[this.Rows[k]][column - 1]) === value) {
         return false;
       }
     }
@@ -302,10 +259,9 @@ class SudokuSolver {
   checkRegionPlacement(puzzleString, row, column, value) {
     this.validate(puzzleString);
     const {
-      Rows,
       puzzleStringMappedToRows
     } = this.puzzleStringProcessor(puzzleString);
-    this.argumentValidator(row, column, value, Rows);
+    this.argumentValidator(row, column, value, this.Rows);
 
     let targetCoordinate = puzzleStringMappedToRows[row][column - 1];
 
@@ -313,14 +269,9 @@ class SudokuSolver {
       return false;
     }
 
-
-    //logic FOR valid region placement is below
     let region = this.regionator(row, column);
 
-    //we will create a string according to the region.
-
     let regionString = this.regionStringMaker(puzzleStringMappedToRows, region);
-
     if (regionString.includes(value.toString())) {
       return false;
     }
@@ -331,27 +282,22 @@ class SudokuSolver {
   // a recursive helper function that sets the global solution variable to the solution puzzleString and return true
   // if no solution is possible returns false!
   sudokuSolver(puzzleString) {
-    let {
-      Rows,
-      puzzleStringMappedToRows
-    } = this.puzzleStringProcessor(puzzleString)
     for (let i = 0; i < 9; i++) {
       for (let j = 1; j < 10; j++) {
+        // 該当の位置の文字がドットの場合
         if (this.checkIfDot(puzzleString, i, j)) {
           for (let k = 1; k <= 9; k++) {
             if (
-              this.checkRowPlacement(puzzleString, Rows[i], j, k) &&
-              this.checkColPlacement(puzzleString, Rows[i], j, k) &&
-              this.checkRegionPlacement(puzzleString, Rows[i], j, k)
+              this.checkRowPlacement(puzzleString, this.Rows[i], j, k) &&
+              this.checkColPlacement(puzzleString, this.Rows[i], j, k) &&
+              this.checkRegionPlacement(puzzleString, this.Rows[i], j, k)
             ) {
-              // puzzleStringMappedToRows[Rows[i]][j] = 'k';
+
               puzzleString = puzzleString.replace('.', k)
 
               if (this.sudokuSolver(puzzleString)) {
                 return true
               } else {
-                // puzzleStringMappedToRows[Rows[i]][j] = '.';
-
                 puzzleString = this.dotPlacer(puzzleString, i, j)
               }
             }
