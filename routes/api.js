@@ -44,10 +44,8 @@ module.exports = function (app) {
       let grid = Solver.convertToGrid(puzzle);
       let solver = new Solver(grid);
 
-      debugger;
-      console.log(`${row}, ${column}, ${value}`);
       let isRightValueViaCoordinate = solver.isRightValueViaCoordinate(row, column, value)
-      console.log(`isRightValueViaCoordinate: ${isRightValueViaCoordinate}`)
+
       if (isRightValueViaCoordinate === true) {
         return res.send({
           valid: true
@@ -55,7 +53,6 @@ module.exports = function (app) {
       }
 
       let reason = solver.isValidResult;
-      console.log(reason)
 
       if (reason['conflictRow']) {
         conflictArray.push('row');
@@ -69,7 +66,6 @@ module.exports = function (app) {
         conflictArray.push('region');
       }
 
-      console.log(conflictArray)
       return res.send({
         valid: false,
         conflict: conflictArray

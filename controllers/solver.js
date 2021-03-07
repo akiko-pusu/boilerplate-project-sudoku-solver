@@ -178,13 +178,6 @@ class Solver {
       const m = 3 * Math.floor(row / 3) + Math.floor(i / 3);
       const n = 3 * Math.floor(col / 3) + i % 3;
 
-      console.log(`row: ${row} / col: ${col} / m: ${m} / n: ${n} - ${this.grid[m][n]}`);
-      /* if (this.grid[m][n] == value && m == row && n == col - 1) {
-        conflictGrid = false;
-        break;
-      }
-      */
-
       if (this.grid[m][n] == value && m != row && n != col - 1) {
         conflictGrid = true;
         break;
