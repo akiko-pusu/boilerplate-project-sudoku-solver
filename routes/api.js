@@ -2,10 +2,9 @@
 
 const SudokuSolver = require('../controllers/sudoku-solver.js');
 const puzzlesAndSolutions = require('../controllers/puzzle-strings');
+const Solver = require('../controllers/solver.js');
 let solver = new SudokuSolver();
 module.exports = function (app) {
-
-  let solver = new SudokuSolver();
 
   app.route('/api/check')
     .post((req, res) => {
@@ -22,49 +21,59 @@ module.exports = function (app) {
           error: 'Required field(s) missing'
         })
       }
+
+      debugger;
       //coordinate is a letter A-I followed by number 1-9
       let row = coordinate[0];
       let column = Number(coordinate[1]);
       value = Number(value);
-      console.log(value);
-      if (solver.argumentValidator(row, column, value, Rows) !== true) {
+
+      let argumentValidator = Solver.argumentValidator(row, column, value, Rows)
+      if (argumentValidator !== true) {
         return res.send({
-          error: solver.argumentValidator(row, column, value, Rows)
+          error: argumentValidator
         })
       }
-      //return error about puzzleString
-      if (solver.validate(puzzle) !== true) {
+
+      if (Solver.isValidPuzzleString(puzzle) !== true) {
         return res.send({
-          error: solver.validate(puzzle)
+          error: Solver.isValidPuzzleString(puzzle)
         });
       }
 
-      if (
-        solver.checkRowPlacement(puzzle, row, column, value) &&
-        solver.checkColPlacement(puzzle, row, column, value) &&
-        solver.checkRegionPlacement(puzzle, row, column, value)
-      ) {
+      let grid = Solver.convertToGrid(puzzle);
+      let solver = new Solver(grid);
+
+      debugger;
+      console.log(`${row}, ${column}, ${value}`);
+      let isRightValueViaCoordinate = solver.isRightValueViaCoordinate(row, column, value)
+      console.log(`isRightValueViaCoordinate: ${isRightValueViaCoordinate}`)
+      if (isRightValueViaCoordinate === true) {
         return res.send({
           valid: true
         });
       }
 
-      if (!solver.checkRowPlacement(puzzle, row, column, value)) {
+      let reason = solver.isValidResult;
+      console.log(reason)
+
+      if (reason['conflictRow']) {
         conflictArray.push('row');
       }
 
-      if (!solver.checkColPlacement(puzzle, row, column, value)) {
+      if (reason['conflictCol']) {
         conflictArray.push('column');
       }
 
-      if (!solver.checkRegionPlacement(puzzle, row, column, value)) {
+      if (reason['conflictGrid']) {
         conflictArray.push('region');
       }
+
+      console.log(conflictArray)
       return res.send({
         valid: false,
         conflict: conflictArray
       })
-
     });
 
   app.route('/api/solve')
@@ -75,9 +84,14 @@ module.exports = function (app) {
         })
       }
       let puzzleString = req.body.puzzle;
-      if (solver.validate(puzzleString) === true) {
+      const validateResult = Solver.isValidPuzzleString(puzzleString);
+
+      if (validateResult === true) {
+        let grid = Solver.convertToGrid(puzzleString);
+        let solver = new Solver(grid);
+
         if (solver.solve(puzzleString)) {
-          let solution = solver.solve(puzzleString);
+          let solution = solver.getSolvedPuzzleString();
           return res.send({
             solution: solution
           });
@@ -89,7 +103,7 @@ module.exports = function (app) {
       }
 
       res.send({
-        error: solver.validate(puzzleString)
+        error: validateResult
       });
 
     });
