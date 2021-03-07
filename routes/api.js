@@ -1,9 +1,7 @@
 'use strict';
 
-const SudokuSolver = require('../controllers/sudoku-solver.js');
 const puzzlesAndSolutions = require('../controllers/puzzle-strings');
 const Solver = require('../controllers/solver.js');
-let solver = new SudokuSolver();
 module.exports = function (app) {
 
   app.route('/api/check')
